@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HalısahaGO</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#1a7a3c;--gl:#25a356;--gd:#0f5229;
+  --gold:#f5c518;--bg:#0a1628;--card:#111f35;
+  --text:#f0f4ff;--muted:#7a8fa8;--red:#e53935;--cyan:#00e5ff;
+}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;min-height:100vh}
+.screen.active{display:flex}
+
+/* NAV */
+nav{background:#060f1e;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--green);position:sticky;top:0;z-index:50;flex-wrap:wrap;gap:8px}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--gl);letter-spacing:2px;cursor:pointer}
+.logo b{color:var(--gold)}
+.nav-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.nbtn{background:none;border:1.5px solid var(--green);color:var(--gl);padding:6px 14px;border-radius:20px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;transition:all .2s}
+.nbtn:hover{background:var(--green);color:#fff}
+.nbtn.gold{border-color:var(--gold);color:var(--gold)}
+.nbtn.gold:hover{background:var(--gold);color:#000}
+.nbtn.danger{border-color:var(--red);color:#ef9a9a}
+.nbtn.danger:hover{background:var(--red);color:#fff}
+.nav-user{font-size:12px;color:var(--muted)}
+.nav-user b{color:var(--gl)}
+
+/* AUTH */
+#registerScreen,#loginScreen{
+  background:linear-gradient(135deg,#061020,#0a1e10,#061020);
+  align-items:center;justify-content:center;padding:30px 16px;overflow-y:auto;
+}
+.auth-box{background:#0e1d34;border:1.5px solid var(--green);border-radius:18px;padding:36px;width:100%;max-width:400px;box-shadow:0 0 50px rgba(26,122,60,.25)}
+.auth-box h2{font-family:'Bebas Neue',sans-serif;font-size:30px;text-align:center;color:var(--gl);letter-spacing:2px;margin-bottom:4px}
+.auth-box .sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:20px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.7px}
+.fg input{width:100%;background:#162035;border:1.5px solid #1e3050;border-radius:9px;padding:11px 13px;color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:border .2s}
+.fg input:focus{border-color:var(--gl)}
+.fg input.bad{border-color:var(--red)}
+.abtn{display:block;width:100%;background:linear-gradient(135deg,var(--gl),var(--gd));border:none;border-radius:9px;padding:13px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:2px;cursor:pointer;margin-top:10px;transition:all .2s;text-align:center}
+.abtn:hover{opacity:.88;transform:translateY(-1px)}
+.switch{text-align:center;margin-top:14px;font-size:13px;color:var(--muted)}
+.switch a{color:var(--gold);cursor:pointer;font-weight:700}
+.hint{text-align:center;margin-top:8px;font-size:11px;color:var(--muted)}
+.hint b{color:var(--gold)}
+.errmsg{background:rgba(229,57,53,.1);border:1px solid rgba(229,57,53,.3);border-radius:8px;padding:8px 12px;color:#ff8a80;font-size:12px;margin-top:8px;display:none}
+
+/* MAIN */
+.hero{background:linear-gradient(180deg,#071a0e,var(--bg));padding:36px 24px 24px;text-align:center;border-bottom:1px solid rgba(26,122,60,.3)}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:46px;color:var(--gl);letter-spacing:3px;line-height:1}
+.hero p{color:var(--muted);margin-top:8px}
+.date-wrap{display:flex;justify-content:center;margin-top:16px}
+.date-pill{background:var(--card);border:1.5px solid rgba(26,122,60,.4);border-radius:11px;padding:10px 20px}
+.date-pill label{font-size:11px;color:var(--muted);display:block;margin-bottom:2px}
+.date-pill input{background:none;border:none;color:var(--text);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;outline:none}
+
+/* FIELDS ON MAIN */
+.sec-hdr{padding:26px 24px 0;text-align:center}
+.sec-hdr h2{font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--gl);letter-spacing:2px}
+.sec-hdr p{color:var(--muted);margin-top:5px;font-size:13px}
+.fields-wrap{display:flex;justify-content:center;padding:22px 16px}
+.fields-inner{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;max-width:920px;width:100%}
+
+/* HOLOGRAM FIELD CARD */
+.fc{border-radius:16px;overflow:hidden;cursor:pointer;transition:all .3s;position:relative;background:var(--card);border:2px solid rgba(0,229,255,.18)}
+.fc:hover{transform:translateY(-5px) scale(1.015);border-color:rgba(0,229,255,.7);box-shadow:0 0 26px rgba(0,229,255,.28),0 16px 40px rgba(0,0,0,.5)}
+.fc.picked{border-color:var(--gold);box-shadow:0 0 32px rgba(245,197,24,.26)}
+.fc.fn{border-color:rgba(0,255,100,.18)}
+.fc.fn:hover{border-color:rgba(0,255,100,.75);box-shadow:0 0 26px rgba(0,255,100,.28),0 16px 40px rgba(0,0,0,.5)}
+.fc.fm{border-color:rgba(100,255,0,.18)}
+.fc.fm:hover{border-color:rgba(100,255,0,.75);box-shadow:0 0 26px rgba(100,255,0,.28),0 16px 40px rgba(0,0,0,.5)}
+.fimg{height:185px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.fi .fimg{background:radial-gradient(ellipse at 50% 65%,#0d1a3a,#050c17 80%)}
+.fn .fimg{background:radial-gradient(ellipse at 50% 65%,#071a0f,#030d07 80%)}
+.fm .fimg{background:radial-gradient(ellipse at 50% 65%,#0d1a07,#060d03 80%)}
+.scanlines{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,229,255,.04) 3px,rgba(0,229,255,.04) 4px);pointer-events:none;z-index:2}
+.fn .scanlines{background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,255,100,.04) 3px,rgba(0,255,100,.04) 4px)}
+.fm .scanlines{background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(100,255,0,.04) 3px,rgba(100,255,0,.04) 4px)}
+.hplat{position:absolute;bottom:11px;left:50%;transform:translateX(-50%);width:110px;height:7px;border-radius:50%;filter:blur(6px);z-index:1;background:rgba(0,200,255,.8)}
+.fn .hplat{background:rgba(0,229,100,.8)}
+.fm .hplat{background:rgba(100,229,0,.8)}
+.hwrap{position:relative;z-index:3;animation:hfl 3s ease-in-out infinite}
+.fc:nth-child(2) .hwrap{animation-delay:.9s}
+.fc:nth-child(3) .hwrap{animation-delay:1.8s}
+@keyframes hfl{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.hsvg{width:160px;height:100px;filter:drop-shadow(0 0 7px rgba(0,229,255,.9)) drop-shadow(0 0 20px rgba(0,229,255,.4))}
+.fn .hsvg{filter:drop-shadow(0 0 7px rgba(0,255,100,.9)) drop-shadow(0 0 20px rgba(0,255,100,.4))}
+.fm .hsvg{filter:drop-shadow(0 0 7px rgba(100,255,0,.9)) drop-shadow(0 0 20px rgba(100,255,0,.4))}
+.hparts{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.pt{position:absolute;border-radius:50%;animation:pup linear infinite;opacity:0}
+@keyframes pup{0%{opacity:0;transform:translateY(0)}20%{opacity:.9}80%{opacity:.3}100%{opacity:0;transform:translateY(-36px)}}
+.fbadge{position:absolute;top:10px;left:10px;padding:3px 10px;border-radius:18px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;z-index:4}
+.fi .fbadge{background:rgba(0,80,180,.6);color:#90caf9;border:1px solid rgba(0,229,255,.3)}
+.fn .fbadge{background:rgba(0,80,40,.6);color:#a5d6a7;border:1px solid rgba(0,255,100,.3)}
+.fm .fbadge{background:rgba(40,80,0,.6);color:#c5e1a5;border:1px solid rgba(100,255,0,.3)}
+.hc{position:absolute;width:12px;height:12px;border-color:#00e5ff;border-style:solid;z-index:4;opacity:.6}
+.hc.tl{top:7px;left:7px;border-width:2px 0 0 2px}
+.hc.tr{top:7px;right:7px;border-width:2px 2px 0 0}
+.hc.bl{bottom:7px;left:7px;border-width:0 0 2px 2px}
+.hc.br{bottom:7px;right:7px;border-width:0 2px 2px 0}
+.fn .hc{border-color:#00ff64}
+.fm .hc{border-color:#64ff00}
+.pickbadge{position:absolute;top:10px;right:10px;width:24px;height:24px;background:var(--gold);border-radius:50%;display:none;align-items:center;justify-content:center;font-size:12px;color:#000;font-weight:800;z-index:5}
+.fc.picked .pickbadge{display:flex}
+.finfo{padding:15px;position:relative;z-index:2}
+.finfo h3{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--text)}
+.finfo p{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
+.ftags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.ftag{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:7px;padding:2px 8px;font-size:10px;color:var(--muted)}
+.fprice{font-family:'Bebas Neue',sans-serif;font-size:23px;color:var(--gold);margin-top:8px}
+.fprice span{font-size:12px;font-family:'Nunito',sans-serif;color:var(--muted)}
+.fbtn{width:100%;background:rgba(0,229,255,.1);border:1.5px solid #00e5ff;border-radius:9px;padding:10px;color:#00e5ff;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1.5px;cursor:pointer;margin-top:10px;transition:all .2s;text-align:center;}
+.fbtn:hover{background:rgba(0,229,255,.25)}
+.fn .fbtn{border-color:#00ff64;color:#00ff64;background:rgba(0,255,100,.08)}
+.fn .fbtn:hover{background:rgba(0,255,100,.22)}
+.fm .fbtn{border-color:#64ff00;color:#64ff00;background:rgba(100,255,0,.08)}
+.fm .fbtn:hover{background:rgba(100,255,0,.22)}
+
+/* SLOTS */
+.slots-sec{padding:0 24px 36px}
+.slots-sec h3{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.slots-sec h3::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08)}
+.slots-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px}
+.slot{background:var(--card);border:1.5px solid rgba(26,122,60,.25);border-radius:11px;padding:13px 10px;text-align:center;cursor:pointer;transition:all .2s}
+.slot:hover{border-color:var(--gl);background:rgba(26,122,60,.14);transform:translateY(-2px)}
+.slot.booked{background:rgba(229,57,53,.06);border-color:rgba(229,57,53,.25);cursor:not-allowed;opacity:.5}
+.slot.booked:hover{transform:none;background:rgba(229,57,53,.06)}
+.slot.picked{background:rgba(26,122,60,.28);border-color:var(--gl);box-shadow:0 0 12px rgba(26,122,60,.35)}
+.slot .st{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--gl);line-height:1.2}
+.slot.booked .st{color:var(--muted)}
+.slot .ss{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-top:4px}
+.slot.booked .ss{color:var(--red)}
+
+/* EQUIPMENT */
+.equip-wrap{max-width:800px;margin:0 auto;padding:24px}
+.equip-wrap h2{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:var(--gl);margin-bottom:6px}
+.equip-wrap .sub{color:var(--muted);font-size:13px;margin-bottom:22px}
+.esec{margin-bottom:24px}
+.esec h3{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.esec h3::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08)}
+.egrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.ecard{background:var(--card);border:1.5px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;cursor:pointer;transition:all .2s;position:relative}
+.ecard:hover{border-color:var(--gl);transform:translateY(-2px)}
+.ecard.picked{border-color:var(--gold);background:rgba(245,197,24,.05);box-shadow:0 0 16px rgba(245,197,24,.15)}
+.eicon{font-size:34px;margin-bottom:8px}
+.ecard h4{font-weight:800;font-size:14px;color:var(--text)}
+.ecard p{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
+.eprice{font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--gold);margin-top:6px}
+.echk{position:absolute;top:10px;right:10px;width:20px;height:20px;background:var(--gold);border-radius:50%;display:none;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:800}
+.ecard.picked .echk{display:flex}
+.ebtns{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.eskip{background:none;border:1.5px solid rgba(255,255,255,.13);border-radius:9px;padding:10px 22px;color:var(--muted);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.eskip:hover{border-color:var(--red);color:#ef9a9a}
+.enext{background:var(--green);border:none;border-radius:9px;padding:11px 28px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1.5px;cursor:pointer;transition:all .2s}
+.enext:hover{background:var(--gl)}
+
+/* PAYMENT */
+.pay-wrap{max-width:600px;margin:0 auto;padding:24px}
+.pay-wrap h2{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:var(--gold);margin-bottom:18px}
+.obox{background:var(--card);border:1.5px solid rgba(26,122,60,.35);border-radius:14px;padding:18px;margin-bottom:16px}
+.obox h3{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1px;margin-bottom:12px;color:var(--gl)}
+.orow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.orow:last-child{border-bottom:none;font-size:16px;font-weight:800;color:var(--gold)}
+.orow label{color:var(--muted)}
+.pform{background:var(--card);border:1.5px solid rgba(255,255,255,.07);border-radius:14px;padding:18px}
+.pform h3{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1px;margin-bottom:14px}
+.pmethods{display:flex;gap:8px;margin-bottom:14px}
+.pm{flex:1;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.09);border-radius:9px;padding:10px 6px;text-align:center;cursor:pointer;transition:all .2s;font-size:11px;font-weight:700;color:var(--muted)}
+.pm:hover,.pm.on{border-color:var(--gl);background:rgba(26,122,60,.13);color:var(--gl)}
+.pm .pmi{font-size:18px;margin-bottom:3px}
+.frow2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.paybtn{width:100%;background:linear-gradient(135deg,#c9a10e,var(--gold));border:none;border-radius:10px;padding:14px;color:#000;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;cursor:pointer;margin-top:8px;transition:all .2s}
+.paybtn:hover{transform:translateY(-1px);box-shadow:0 7px 20px rgba(245,197,24,.35)}
+.secure{text-align:center;margin-top:9px;font-size:11px;color:var(--muted)}
+
+/* SUCCESS */
+#successScreen{align-items:center;justify-content:center}
+.scard{background:var(--card);border:2px solid var(--green);border-radius:20px;padding:44px 36px;text-align:center;max-width:400px;width:90%;box-shadow:0 0 50px rgba(26,122,60,.28)}
+.sicon{width:72px;height:72px;background:rgba(26,122,60,.18);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px}
+.scard h2{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gl);letter-spacing:2px}
+.scard p{color:var(--muted);margin-top:7px;font-size:13px;line-height:1.6}
+.ticket{background:rgba(255,255,255,.03);border:1px dashed rgba(26,122,60,.45);border-radius:12px;padding:14px;margin:16px 0;text-align:left}
+.trow{display:flex;justify-content:space-between;font-size:12px;padding:4px 0}
+.trow label{color:var(--muted)}
+.trow span{font-weight:700;color:var(--gold)}
+.newbtn{background:var(--green);border:none;border-radius:9px;padding:11px 26px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1.5px;cursor:pointer;margin-top:10px;transition:all .2s}
+.newbtn:hover{background:var(--gl)}
+
+/* MY RESERVATIONS */
+.mywrap{max-width:820px;margin:0 auto;padding:24px}
+.mywrap h2{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:2px;color:var(--gl);margin-bottom:18px}
+.rcard{background:var(--card);border:1.5px solid rgba(26,122,60,.28);border-radius:13px;padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.rcard.canc{opacity:.45;border-color:rgba(229,57,53,.25)}
+.rinfo h4{font-weight:800;font-size:14px;color:var(--text)}
+.rinfo p{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.6}
+.rright{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+.rprice{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)}
+.pill{display:inline-block;padding:3px 9px;border-radius:9px;font-size:10px;font-weight:800;text-transform:uppercase}
+.pok{background:rgba(26,122,60,.18);color:#81c784}
+.pcanc{background:rgba(229,57,53,.13);color:#ef9a9a}
+.cancbtn{background:none;border:1px solid rgba(229,57,53,.35);border-radius:7px;padding:4px 12px;color:#ef9a9a;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.cancbtn:hover{background:rgba(229,57,53,.13)}
+.empty{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty .ei{font-size:44px;margin-bottom:12px}
+
+/* ACCOUNT */
+.accwrap{max-width:560px;margin:0 auto;padding:24px}
+.accwrap h2{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:2px;color:var(--gl);margin-bottom:18px}
+.acard{background:var(--card);border:1.5px solid rgba(255,255,255,.07);border-radius:14px;padding:22px;margin-bottom:16px}
+.acard h3{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:1px;margin-bottom:14px}
+.avatar{width:66px;height:66px;border-radius:50%;background:rgba(26,122,60,.22);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:var(--gl);margin:0 auto 12px}
+.aname{text-align:center;font-size:17px;font-weight:800}
+.aemail{text-align:center;font-size:12px;color:var(--muted);margin-top:3px}
+.astat-row{display:flex;gap:10px;margin-top:16px}
+.astat{flex:1;background:rgba(255,255,255,.04);border-radius:9px;padding:10px;text-align:center}
+.astat .asl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.astat .asv{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold);margin-top:2px}
+.savebtn{background:var(--green);border:none;border-radius:9px;padding:10px 22px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;cursor:pointer;transition:all .2s;margin-top:4px}
+.savebtn:hover{background:var(--gl)}
+
+/* ADMIN */
+.admwrap{max-width:1100px;margin:0 auto;padding:24px}
+.admwrap h2{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:2px;color:var(--gold);margin-bottom:18px}
+.admstats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+.sc{background:var(--card);border-radius:12px;padding:15px;border:1.5px solid rgba(255,255,255,.06)}
+.scl{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.7px}
+.scv{font-family:'Bebas Neue',sans-serif;font-size:32px;margin-top:4px}
+.s1 .scv{color:var(--gl)} .s2 .scv{color:var(--gold)} .s3 .scv{color:#64b5f6} .s4 .scv{color:var(--red)}
+.admtabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.atab{background:var(--card);border:1.5px solid rgba(255,255,255,.07);border-radius:9px;padding:7px 16px;cursor:pointer;font-size:12px;font-weight:700;color:var(--muted);transition:all .2s}
+.atab:hover,.atab.on{background:rgba(26,122,60,.18);border-color:var(--green);color:var(--gl)}
+.atbl{background:var(--card);border-radius:12px;overflow:auto;border:1.5px solid rgba(255,255,255,.06)}
+.atbl table{width:100%;border-collapse:collapse;min-width:540px}
+.atbl th{background:rgba(26,122,60,.12);padding:10px 13px;text-align:left;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}
+.atbl td{padding:11px 13px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.03)}
+.atbl tr:last-child td{border-bottom:none}
+.atbl tr:hover td{background:rgba(255,255,255,.015)}
+.abtn2{background:none;border:1px solid rgba(255,255,255,.13);border-radius:6px;padding:3px 9px;color:var(--muted);font-size:11px;cursor:pointer;font-family:inherit;transition:all .2s}
+.abtn2:hover{border-color:var(--red);color:#ef9a9a}
+.abtn2.ok:hover{border-color:var(--gl);color:var(--gl)}
+.erow{text-align:center;color:var(--muted);padding:20px!important}
+
+/* UTILS */
+.topbar{display:flex;align-items:center;padding:16px 24px 0}
+.backbtn{background:none;border:1.5px solid rgba(255,255,255,.13);border-radius:8px;padding:7px 15px;color:var(--muted);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.backbtn:hover{border-color:var(--green);color:var(--gl)}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--green);color:#fff;padding:12px 18px;border-radius:10px;font-weight:700;font-size:13px;z-index:9999;animation:tup .3s ease;pointer-events:none}
+@keyframes tup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo" id="logoBtn">⚽ HALI<b>SAHA</b>GO</div>
+  <div class="nav-right">
+    <span class="nav-user" id="navUser" style="display:none">👤 <b id="navName"></b></span>
+    <button class="nbtn" id="btnBook" style="display:none" onclick="showScreen('mainScreen');buildSlots()">Book Field</button>
+    <button class="nbtn" id="btnMyRes" style="display:none" onclick="showScreen('myResScreen');buildMyRes()">My Reservations</button>
+    <button class="nbtn" id="btnAcc" style="display:none" onclick="showScreen('accountScreen');buildAccount()">My Account</button>
+    <button class="nbtn gold" id="btnAdmin" style="display:none" onclick="showScreen('adminScreen')">Admin Panel</button>
+    <button class="nbtn danger" id="btnLogout" style="display:none" onclick="doLogout()">Logout</button>
+  </div>
+</nav>
+
+<div class="screen active" id="registerScreen">
+  <div class="auth-box">
+    <h2>CREATE ACCOUNT</h2>
+    <p class="sub">Join us and book your field! ⚽</p>
+    <div class="row2">
+      <div class="fg"><label>First Name</label><input type="text" id="rFirst" placeholder="John"></div>
+      <div class="fg"><label>Last Name</label><input type="text" id="rLast" placeholder="Smith"></div>
+    </div>
+    <div class="fg"><label>Email</label><input type="email" id="rEmail" placeholder="john@email.com"></div>
+    <div class="fg"><label>Phone</label><input type="tel" id="rPhone" placeholder="+90 5XX XXX XX XX"></div>
+    <div class="fg"><label>Password</label><input type="password" id="rPass" placeholder="Min. 6 characters"></div>
+    <div class="fg"><label>Confirm Password</label><input type="password" id="rPass2" placeholder="Repeat password"></div>
+    <div class="errmsg" id="rErr"></div>
+    <button class="abtn" id="regBtn">CREATE ACCOUNT</button>
+    <div class="switch">Already have an account? <a onclick="showScreen('loginScreen')">Sign In</a></div>
+    <div class="hint">Admin login available on Sign In page — <b>admin / admin123</b></div>
+  </div>
+</div>
+
+<div class="screen" id="loginScreen">
+  <div class="auth-box">
+    <h2>SIGN IN</h2>
+    <p class="sub">Welcome back! The field is waiting. 🏆</p>
+    <div class="fg"><label>Email</label><input type="email" id="lEmail" placeholder="john@email.com"></div>
+    <div class="fg"><label>Password</label><input type="password" id="lPass" placeholder="••••••••"></div>
+    <div class="errmsg" id="lErr"></div>
+    <button class="abtn" id="loginBtn">SIGN IN</button>
+    <div class="switch">No account yet? <a onclick="showScreen('registerScreen')">Register</a></div>
+    <div class="hint">Admin: <b>admin / admin123</b></div>
+  </div>
+</div>
+
+<div class="screen" id="mainScreen">
+  <div class="hero">
+    <h1>BOOK YOUR FIELD</h1>
+    <p>Select a date, pick a field, and hit the pitch!</p>
+    <div class="date-wrap">
+      <div class="date-pill">
+        <label>Select Date</label>
+        <input type="date" id="dateInput">
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-hdr" style="padding-top:20px;">
+    <h2>1. SELECT FIELD TYPE</h2>
+    <p>Hologram preview — choose your field ✨</p>
+  </div>
+  <div class="fields-wrap">
+    <div class="fields-inner">
+
+      <div class="fc fi picked" id="fc-indoor">
+        <div class="pickbadge">✓</div>
+        <div class="hc tl"></div><div class="hc tr"></div><div class="hc bl"></div><div class="hc br"></div>
+        <div class="fimg">
+          <div class="fbadge">INDOOR FIELD</div>
+          <div class="scanlines"></div>
+          <div class="hparts" id="p0"></div>
+          <div class="hwrap">
+            <svg class="hsvg" viewBox="0 0 160 100" fill="none">
+              <rect x="6" y="6" width="148" height="88" rx="4" fill="rgba(0,180,255,.07)" stroke="#00e5ff" stroke-width="1.5"/>
+              <line x1="80" y1="6" x2="80" y2="94" stroke="#00e5ff" stroke-width="1.2" stroke-dasharray="5,4"/>
+              <circle cx="80" cy="50" r="16" fill="none" stroke="#00e5ff" stroke-width="1.2"/>
+              <circle cx="80" cy="50" r="3" fill="#00e5ff"/>
+              <rect x="6" y="28" width="26" height="44" fill="none" stroke="#00e5ff" stroke-width="1.2"/>
+              <rect x="128" y="28" width="26" height="44" fill="none" stroke="#00e5ff" stroke-width="1.2"/>
+              <rect x="6" y="38" width="9" height="24" fill="none" stroke="#80f0ff" stroke-width="1.2"/>
+              <rect x="145" y="38" width="9" height="24" fill="none" stroke="#80f0ff" stroke-width="1.2"/>
+            </svg>
+          </div>
+          <div class="hplat"></div>
+        </div>
+        <div class="finfo">
+          <h3>INDOOR FIELD</h3>
+          <p>Air-conditioned, weather-proof premium indoor field with hardwood floor.</p>
+          <div class="ftags"><span class="ftag">🏠 Indoor</span><span class="ftag">❄️ AC</span><span class="ftag">💡 LED</span><span class="ftag">👥 5v5</span></div>
+          <div class="fprice">350₺ <span>/ hour</span></div>
+          <div class="fbtn">SELECT FIELD</div>
+        </div>
+      </div>
+
+      <div class="fc fn" id="fc-normal">
+        <div class="pickbadge">✓</div>
+        <div class="hc tl"></div><div class="hc tr"></div><div class="hc bl"></div><div class="hc br"></div>
+        <div class="fimg">
+          <div class="fbadge">STANDARD FIELD</div>
+          <div class="scanlines"></div>
+          <div class="hparts" id="p1"></div>
+          <div class="hwrap">
+            <svg class="hsvg" viewBox="0 0 160 100" fill="none">
+              <rect x="6" y="6" width="148" height="88" rx="4" fill="rgba(0,255,100,.06)" stroke="#00ff64" stroke-width="1.5"/>
+              <line x1="80" y1="6" x2="80" y2="94" stroke="#00ff64" stroke-width="1.2" stroke-dasharray="5,4"/>
+              <circle cx="80" cy="50" r="16" fill="none" stroke="#00ff64" stroke-width="1.2"/>
+              <circle cx="80" cy="50" r="3" fill="#00ff64"/>
+              <rect x="6" y="28" width="26" height="44" fill="none" stroke="#00ff64" stroke-width="1.2"/>
+              <rect x="128" y="28" width="26" height="44" fill="none" stroke="#00ff64" stroke-width="1.2"/>
+              <rect x="6" y="38" width="9" height="24" fill="none" stroke="#80ffb0" stroke-width="1.2"/>
+              <rect x="145" y="38" width="9" height="24" fill="none" stroke="#80ffb0" stroke-width="1.2"/>
+              <rect x="32" y="6" width="96" height="88" fill="none" stroke="#00ff64" stroke-width=".4" opacity=".3"/>
+            </svg>
+          </div>
+          <div class="hplat"></div>
+        </div>
+        <div class="finfo">
+          <h3>STANDARD FIELD</h3>
+          <p>Standard size, artificial grass, night-lit open outdoor field.</p>
+          <div class="ftags"><span class="ftag">🌿 Grass</span><span class="ftag">🌙 Night Lights</span><span class="ftag">🚿 Locker Room</span><span class="ftag">👥 7v7</span></div>
+          <div class="fprice">200₺ <span>/ hour</span></div>
+          <div class="fbtn">SELECT FIELD</div>
+        </div>
+      </div>
+
+      <div class="fc fm" id="fc-mini">
+        <div class="pickbadge">✓</div>
+        <div class="hc tl"></div><div class="hc tr"></div><div class="hc bl"></div><div class="hc br"></div>
+        <div class="fimg">
+          <div class="fbadge">MINI FIELD</div>
+          <div class="scanlines"></div>
+          <div class="hparts" id="p2"></div>
+          <div class="hwrap">
+            <svg class="hsvg" viewBox="0 0 160 100" fill="none">
+              <rect x="22" y="12" width="116" height="76" rx="4" fill="rgba(100,255,0,.06)" stroke="#64ff00" stroke-width="1.5"/>
+              <line x1="80" y1="12" x2="80" y2="88" stroke="#64ff00" stroke-width="1.2" stroke-dasharray="5,4"/>
+              <circle cx="80" cy="50" r="12" fill="none" stroke="#64ff00" stroke-width="1.2"/>
+              <circle cx="80" cy="50" r="3" fill="#64ff00"/>
+              <rect x="22" y="32" width="20" height="36" fill="none" stroke="#64ff00" stroke-width="1.2"/>
+              <rect x="118" y="32" width="20" height="36" fill="none" stroke="#64ff00" stroke-width="1.2"/>
+              <rect x="22" y="40" width="7" height="20" fill="none" stroke="#b0ff80" stroke-width="1.2"/>
+              <rect x="131" y="40" width="7" height="20" fill="none" stroke="#b0ff80" stroke-width="1.2"/>
+            </svg>
+          </div>
+          <div class="hplat"></div>
+        </div>
+        <div class="finfo">
+          <h3>MINI FIELD</h3>
+          <p>Compact field ideal for small groups. Fun at a great price.</p>
+          <div class="ftags"><span class="ftag">🔢 4v4</span><span class="ftag">⚡ Quick</span><span class="ftag">🎯 Focused</span><span class="ftag">💰 Budget</span></div>
+          <div class="fprice">120₺ <span>/ hour</span></div>
+          <div class="fbtn">SELECT FIELD</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="slots-sec">
+    <h3 id="slotsHdr">2. SELECT A TIME SLOT FOR INDOOR FIELD</h3>
+    <div class="slots-grid" id="slotsGrid"></div>
+  </div>
+</div>
+
+<div class="screen" id="equipScreen">
+  <div class="topbar"><button class="backbtn" onclick="showScreen('mainScreen')">← Back to Main</button></div>
+  <div class="equip-wrap">
+    <h2>EQUIPMENT RENTAL</h2>
+    <p class="sub">Would you like to rent any equipment? (Optional)</p>
+    <div class="esec">
+      <h3>👟 FOOTWEAR</h3>
+      <div class="egrid">
+        <div class="ecard" id="eq-cleats">
+          <div class="echk">✓</div>
+          <div class="eicon">👟</div>
+          <h4>Studded Cleats</h4>
+          <p>Hard-ground football boots with conical studs. Maximum grip on firm & natural grass surfaces.</p>
+          <div class="eprice">60₺</div>
+        </div>
+        <div class="ecard" id="eq-turf">
+          <div class="echk">✓</div>
+          <div class="eicon">👟</div>
+          <h4>Turf Football Shoes</h4>
+          <p>Flat rubber-soled shoes made for artificial grass & indoor pitches. No studs.</p>
+          <div class="eprice">45₺</div>
+        </div>
+      </div>
+    </div>
+    <div class="esec">
+      <h3>🧤 GLOVES</h3>
+      <div class="egrid">
+        <div class="ecard" id="eq-gloves">
+          <div class="echk">✓</div>
+          <div class="eicon">🧤</div>
+          <h4>Goalkeeper Gloves</h4>
+          <p>Professional goalkeeper gloves with palm grip. One size fits most adults.</p>
+          <div class="eprice">30₺</div>
+        </div>
+      </div>
+    </div>
+    <div class="ebtns">
+      <button class="eskip" id="skipEquip">Skip — No Equipment</button>
+      <button class="enext" id="nextEquip">Continue to Payment →</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="paymentScreen">
+  <div class="topbar"><button class="backbtn" onclick="showScreen('equipScreen')">← Back</button></div>
+  <div class="pay-wrap">
+    <h2>CHECKOUT</h2>
+    <div class="obox">
+      <h3>ORDER SUMMARY</h3>
+      <div class="orow"><label>Date</label><span id="oDate">-</span></div>
+      <div class="orow"><label>Time Slot</label><span id="oTime">-</span></div>
+      <div class="orow"><label>Field</label><span id="oField">-</span></div>
+      <div class="orow" id="oEquipRow" style="display:none"><label>Equipment</label><span id="oEquip">-</span></div>
+      <div class="orow"><label>TOTAL</label><span id="oTotal">-</span></div>
+    </div>
+    <div class="pform">
+      <h3>PAYMENT METHOD</h3>
+      <div class="pmethods">
+        <div class="pm on" id="pm-card"><div class="pmi">💳</div>Credit Card</div>
+        <div class="pm" id="pm-transfer"><div class="pmi">🏦</div>Bank Transfer</div>
+        <div class="pm" id="pm-cash"><div class="pmi">💵</div>Cash (On-site)</div>
+      </div>
+      <div id="cardSection">
+        <div class="fg"><label>Cardholder Name</label><input type="text" id="cName" placeholder="JOHN SMITH"></div>
+        <div class="fg"><label>Card Number</label><input type="text" id="cNum" placeholder="0000 0000 0000 0000" maxlength="19"></div>
+        <div class="frow2">
+          <div class="fg"><label>Expiry (MM/YY)</label><input type="text" id="cExp" placeholder="MM/YY" maxlength="5"></div>
+          <div class="fg"><label>CVV</label><input type="text" id="cCvv" placeholder="000" maxlength="3"></div>
+        </div>
+      </div>
+      <button class="paybtn" id="payBtn">COMPLETE PAYMENT 🏆</button>
+      <p class="secure">🔒 Secured with 256-bit SSL</p>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="successScreen">
+  <div class="scard">
+    <div class="sicon">✅</div>
+    <h2>BOOKING CONFIRMED!</h2>
+    <p>Payment received. See you on the pitch!</p>
+    <div class="ticket">
+      <div class="trow"><label>Booking ID</label><span id="tId">-</span></div>
+      <div class="trow"><label>Date & Time</label><span id="tTime">-</span></div>
+      <div class="trow"><label>Field</label><span id="tField">-</span></div>
+      <div class="trow" id="tEquipRow"><label>Equipment</label><span id="tEquip">-</span></div>
+      <div class="trow"><label>Amount Paid</label><span id="tPrice">-</span></div>
+    </div>
+    <button class="newbtn" id="newBookBtn">NEW BOOKING</button>
+  </div>
+</div>
+
+<div class="screen" id="myResScreen">
+  <div class="topbar"><button class="backbtn" onclick="showScreen('mainScreen')">← Back</button></div>
+  <div class="mywrap">
+    <h2>MY RESERVATIONS</h2>
+    <div id="myResList"></div>
+  </div>
+</div>
+
+<div class="screen" id="accountScreen">
+  <div class="topbar"><button class="backbtn" onclick="showScreen('mainScreen')">← Back</button></div>
+  <div class="accwrap">
+    <h2>MY ACCOUNT</h2>
+    <div class="acard">
+      <div class="avatar" id="accAva">JD</div>
+      <div class="aname" id="accNm">John Doe</div>
+      <div class="aemail" id="accEm">-</div>
+      <div class="astat-row">
+        <div class="astat"><div class="asl">Bookings</div><div class="asv" id="accTotal">0</div></div>
+        <div class="astat"><div class="asl">Active</div><div class="asv" id="accActive">0</div></div>
+        <div class="astat"><div class="asl">Spent</div><div class="asv" id="accSpent">0₺</div></div>
+      </div>
+    </div>
+    <div class="acard">
+      <h3>EDIT PROFILE</h3>
+      <div class="row2">
+        <div class="fg"><label>First Name</label><input type="text" id="aFirst"></div>
+        <div class="fg"><label>Last Name</label><input type="text" id="aLast"></div>
+      </div>
+      <div class="fg"><label>Phone</label><input type="tel" id="aPhone"></div>
+      <button class="savebtn" id="saveProfileBtn">SAVE CHANGES</button>
+    </div>
+    <div class="acard">
+      <h3>CHANGE PASSWORD</h3>
+      <div class="fg"><label>Current Password</label><input type="password" id="aOld" placeholder="••••••••"></div>
+      <div class="fg"><label>New Password</label><input type="password" id="aNew" placeholder="Min. 6 characters"></div>
+      <div class="fg"><label>Confirm New Password</label><input type="password" id="aNew2" placeholder="Repeat new password"></div>
+      <div class="errmsg" id="passErr"></div>
+      <button class="savebtn" id="savePassBtn">CHANGE PASSWORD</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="adminScreen">
+  <div class="admwrap">
+    <h2>⚙️ ADMIN PANEL</h2>
+    <div class="admstats">
+      <div class="sc s1"><div class="scl">Active Bookings</div><div class="scv" id="admOk">0</div></div>
+      <div class="sc s2"><div class="scl">Total Revenue</div><div class="scv" id="admRev">0₺</div></div>
+      <div class="sc s3"><div class="scl">Users</div><div class="scv" id="admUsers">0</div></div>
+      <div class="sc s4"><div class="scl">Cancelled</div><div class="scv" id="admCanc">0</div></div>
+    </div>
+    <div class="admtabs">
+      <button class="atab on" id="tab-res-btn" onclick="admTab('res')">Reservations</button>
+      <button class="atab" id="tab-slots-btn" onclick="admTab('slots')">Time Slots</button>
+      <button class="atab" id="tab-users-btn" onclick="admTab('users')">Users</button>
+    </div>
+    <div id="tab-res"><div class="atbl"><table>
+      <thead><tr><th>ID</th><th>User</th><th>Date & Time</th><th>Field</th><th>Equipment</th><th>Total</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody id="resBody"></tbody>
+    </table></div></div>
+    
+    <div id="tab-slots" style="display:none">
+      <div style="margin-bottom: 16px; display:flex; gap:10px; align-items:center;">
+        <label style="font-size:12px; font-weight:800; color:var(--muted); text-transform:uppercase;">Select Date:</label>
+        <input type="date" id="admDate" style="background:var(--card); border:1.5px solid rgba(255,255,255,.07); border-radius:8px; padding:6px 12px; color:var(--text); font-family:inherit; outline:none;">
+      </div>
+      <div class="atbl"><table>
+        <thead><tr><th>Time Slot</th><th>Indoor Field</th><th>Standard Field</th><th>Mini Field</th><th>Action</th></tr></thead>
+        <tbody id="slotBody"></tbody>
+      </table></div>
+    </div>
+
+    <div id="tab-users" style="display:none"><div class="atbl"><table>
+      <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Bookings</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody id="userBody"></tbody>
+    </table></div></div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───
+var PRICES  = {indoor:350, normal:200, mini:120};
+var NAMES   = {indoor:'Indoor Field', normal:'Standard Field', mini:'Mini Field'};
+var EPRICES = {cleats:60, turf:45, gloves:30};
+var ENAMES  = {cleats:'Studded Cleats', turf:'Turf Football Shoes', gloves:'Goalkeeper Gloves'};
+var HOURS   = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00','23:00','00:00'];
+
+var users        = [];
+var reservations = [];
+var closedSlots  = []; 
+var currentUser  = null;
+var curTime = '', curDate = '';
+var curField = 'indoor'; // Default selected field
+var equip   = {cleats:false, turf:false, gloves:false};
+var curPM   = 'card';
+
+// YARDIMCI FONKSİYON: Bugünün tarihini YYYY-MM-DD formatında al (Yerel saate göre)
+function getTodayStr() {
+  var d = new Date();
+  var y = d.getFullYear();
+  var m = String(d.getMonth() + 1).padStart(2, '0');
+  var day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
+}
+
+// ─── SCREEN ───
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+
+// ─── LOGO ───
+document.getElementById('logoBtn').onclick = function(){
+  if(!currentUser) return;
+  if(currentUser.isAdmin){ showScreen('adminScreen'); }
+  else { buildSlots(); showScreen('mainScreen'); }
+};
+
+// ─── TOAST ───
+function toast(msg, color){
+  var t = document.createElement('div');
+  t.className = 'toast';
+  t.style.background = color || 'var(--green)';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.remove(); }, 3000);
+}
+
+// ─── ERR ───
+function showErr(id, msg){ var e=document.getElementById(id); e.textContent=msg; e.style.display='block'; }
+function hideErr(id){ document.getElementById(id).style.display='none'; }
+
+// ─── NAV VISIBILITY ───
+function updateNav(){
+  var loggedIn = !!currentUser;
+  var isAdmin  = loggedIn && currentUser.isAdmin;
+  document.getElementById('navUser').style.display   = loggedIn ? '' : 'none';
+  document.getElementById('navName').textContent     = loggedIn ? currentUser.first + (currentUser.last ? ' '+currentUser.last : '') : '';
+  document.getElementById('btnBook').style.display   = loggedIn && !isAdmin ? '' : 'none';
+  document.getElementById('btnMyRes').style.display  = loggedIn && !isAdmin ? '' : 'none';
+  document.getElementById('btnAcc').style.display    = loggedIn && !isAdmin ? '' : 'none';
+  document.getElementById('btnAdmin').style.display  = isAdmin ? '' : 'none';
+  document.getElementById('btnLogout').style.display = loggedIn ? '' : 'none';
+}
+
+// ─── REGISTER ───
+document.getElementById('regBtn').onclick = function(){
+  hideErr('rErr');
+  var first = document.getElementById('rFirst').value.trim();
+  var last  = document.getElementById('rLast').value.trim();
+  var email = document.getElementById('rEmail').value.trim().toLowerCase();
+  var phone = document.getElementById('rPhone').value.trim();
+  var pass  = document.getElementById('rPass').value;
+  var pass2 = document.getElementById('rPass2').value;
+  
+  var phoneDigits = phone.replace(/\D/g, ''); // Sadece rakamları al
+
+  if(!first || !last || !email || !phone || !pass || !pass2){ showErr('rErr','Please fill in all fields.'); return; }
+  
+  // Telefon geçerlilik kontrolü (10-15 hane arası)
+  if(phoneDigits.length < 10 || phoneDigits.length > 15){ showErr('rErr','Please enter a valid phone number (10-15 digits).'); return; }
+  
+  if(pass.length < 6){ showErr('rErr','Password must be at least 6 characters.'); return; }
+  if(pass !== pass2){ showErr('rErr','Passwords do not match.'); return; }
+  if(users.find(function(u){ return u.email===email; })){ showErr('rErr','This email is already registered.'); return; }
+  
+  users.push({first:first, last:last, email:email, phone:phone, pass:pass, blocked:false, resCount:0});
+  toast('✅ Account created! Please sign in.');
+  document.getElementById('lEmail').value = email;
+  showScreen('loginScreen');
+};
+
+// ─── LOGIN ───
+document.getElementById('loginBtn').onclick = function(){
+  hideErr('lErr');
+  var email = document.getElementById('lEmail').value.trim().toLowerCase();
+  var pass  = document.getElementById('lPass').value;
+  if(email === 'admin' && pass === 'admin123'){
+    currentUser = {first:'Admin', last:'', email:'admin', isAdmin:true};
+    updateNav();
+    buildResTable(); buildSlotTable(); buildUserTable();
+    showScreen('adminScreen');
+    return;
+  }
+  var u = users.find(function(x){ return x.email===email && x.pass===pass; });
+  if(!u){ showErr('lErr','Invalid email or password.'); return; }
+  if(u.blocked){ showErr('lErr','Your account has been suspended.'); return; }
+  currentUser = u;
+  updateNav();
+  buildSlots();
+  showScreen('mainScreen');
+};
+
+// ─── LOGOUT ───
+function doLogout(){
+  currentUser = null;
+  updateNav();
+  showScreen('registerScreen');
+}
+
+// ─── FIELDS SELECTION (MAIN PAGE) ───
+['indoor','normal','mini'].forEach(function(type){
+  var card = document.getElementById('fc-'+type);
+  card.onclick = function(){
+    document.querySelectorAll('.fc').forEach(function(c){ c.classList.remove('picked'); });
+    card.classList.add('picked');
+    curField = type;
+    document.getElementById('slotsHdr').innerHTML = '2. SELECT A TIME SLOT FOR ' + NAMES[type].toUpperCase();
+    buildSlots(); // Refresh slots for new field
+  };
+});
+
+// ─── SLOTS ───
+function nextH(h){ if(h==='23:00')return'00:00'; if(h==='00:00')return'01:00'; return String(+h.split(':')[0]+1).padStart(2,'0')+':00'; }
+function slotLbl(h){ return h + ' - ' + nextH(h); }
+
+function buildSlots(){
+  var grid = document.getElementById('slotsGrid');
+  var di   = document.getElementById('dateInput');
+  
+  var todayStr = getTodayStr();
+  di.min = todayStr; // Geçmiş tarih seçimini takvimden engelle
+  
+  if(!di.value) di.value = todayStr;
+  curDate = di.value;
+  grid.innerHTML = '';
+  
+  var currentHour = new Date().getHours();
+  
+  HOURS.forEach(function(h){
+    var booked = reservations.some(function(r) { 
+        return r.date === curDate && r.time.split(' - ')[0] === h && r.status === 'ok' && r.fieldId === curField; 
+    });
+    var closed  = closedSlots.indexOf(h) >= 0;
+    
+    // Geçmiş saat veya tarih kontrolü
+    var hourInt = parseInt(h.split(':')[0], 10);
+    if(hourInt === 0) hourInt = 24; // 00:00 gece sonu olarak kabul edilir
+    var isPast = (curDate < todayStr) || (curDate === todayStr && hourInt <= currentHour);
+    
+    var unavail = booked || closed || isPast;
+    
+    var d = document.createElement('div');
+    d.className = 'slot' + (unavail ? ' booked' : '');
+    
+    var statusTxt = booked ? 'Booked' : closed ? 'Closed' : isPast ? 'Past' : 'Available';
+    
+    d.innerHTML = '<div class="st">' + slotLbl(h) + '</div><div class="ss">' + statusTxt + '</div>';
+    
+    if(!unavail){
+      d.onclick = function(){
+        document.querySelectorAll('.slot').forEach(function(s){ s.classList.remove('picked'); });
+        d.classList.add('picked');
+        curTime = slotLbl(h);
+        curDate = document.getElementById('dateInput').value;
+        
+        // Ekipmanları temizle ve Ekipman ekranına geç
+        equip = {cleats:false, turf:false, gloves:false};
+        ['eq-cleats','eq-turf','eq-gloves'].forEach(function(id){ document.getElementById(id).classList.remove('picked'); });
+        setTimeout(function(){ showScreen('equipScreen'); }, 180);
+      };
+    } else {
+      d.onclick = function(){
+        if(isPast && !booked && !closed) {
+          toast('⚠️ Geçmiş zamana rezervasyon yapamazsınız!', '#e53935');
+        }
+      };
+    }
+    grid.appendChild(d);
+  });
+  di.onchange = buildSlots;
+}
+
+// ─── EQUIPMENT ───
+['cleats','turf','gloves'].forEach(function(key){
+  document.getElementById('eq-'+key).onclick = function(){
+    if(key === 'cleats' || key === 'turf'){
+      var other = key === 'cleats' ? 'turf' : 'cleats';
+      equip[other] = false;
+      document.getElementById('eq-'+other).classList.remove('picked');
+    }
+    equip[key] = !equip[key];
+    document.getElementById('eq-'+key).classList.toggle('picked', equip[key]);
+  };
+});
+
+function goToPayment(){
+  var eList  = Object.keys(equip).filter(function(k){ return equip[k]; });
+  var eCost  = eList.reduce(function(s,k){ return s + EPRICES[k]; }, 0);
+  var total  = PRICES[curField] + eCost;
+  document.getElementById('oDate').textContent  = curDate;
+  document.getElementById('oTime').textContent  = curTime;
+  document.getElementById('oField').textContent = NAMES[curField];
+  if(eList.length){
+    document.getElementById('oEquip').textContent   = eList.map(function(k){ return ENAMES[k]; }).join(', ') + ' (+'+eCost+'₺)';
+    document.getElementById('oEquipRow').style.display = '';
+  } else {
+    document.getElementById('oEquipRow').style.display = 'none';
+  }
+  document.getElementById('oTotal').textContent = total + '₺';
+  showScreen('paymentScreen');
+}
+
+document.getElementById('skipEquip').onclick  = function(){ equip={cleats:false,turf:false,gloves:false}; ['eq-cleats','eq-turf','eq-gloves'].forEach(function(id){document.getElementById(id).classList.remove('picked');}); goToPayment(); };
+document.getElementById('nextEquip').onclick  = function(){ goToPayment(); };
+
+// ─── PAYMENT METHOD ───
+['card','transfer','cash'].forEach(function(m){
+  document.getElementById('pm-'+m).onclick = function(){
+    document.querySelectorAll('.pm').forEach(function(p){ p.classList.remove('on'); });
+    this.classList.add('on');
+    curPM = m;
+    document.getElementById('cardSection').style.display = (m === 'card') ? '' : 'none';
+  };
+});
+
+document.getElementById('cNum').oninput = function(){
+  var v = this.value.replace(/\D/g,'').substring(0,16);
+  this.value = v.replace(/(.{4})/g,'$1 ').trim();
+};
+document.getElementById('cExp').oninput = function(){
+  var v = this.value.replace(/\D/g,'');
+  if(v.length >= 2) v = v.substring(0,2) + '/' + v.substring(2,4);
+  this.value = v;
+};
+
+// ─── PAY ───
+document.getElementById('payBtn').onclick = function(){
+  if(curPM === 'card'){
+    var name = document.getElementById('cName').value.trim();
+    var num  = document.getElementById('cNum').value.replace(/\s/g,'');
+    var exp  = document.getElementById('cExp').value.trim();
+    var cvv  = document.getElementById('cCvv').value.trim();
+    var ok   = true;
+    
+    if(!name){ document.getElementById('cName').classList.add('bad'); ok=false; } else document.getElementById('cName').classList.remove('bad');
+    
+    // Geçerli Kart Kontrolü: Uzunluğu 16 olmalı ve sadece 0'lardan oluşmamalı
+    if(num.length !== 16 || /^0+$/.test(num)){ 
+      document.getElementById('cNum').classList.add('bad'); 
+      ok=false; 
+    } else { 
+      document.getElementById('cNum').classList.remove('bad'); 
+    }
+    
+    // Geçerli Tarih Kontrolü: Geçmiş tarih veya hatalı format olamaz
+    var expValid = false;
+    if(/^(0[1-9]|1[0-2])\/\d{2}$/.test(exp)){
+      var expParts = exp.split('/');
+      var expM = parseInt(expParts[0], 10);
+      var expY = parseInt(expParts[1], 10);
+      var dNow = new Date();
+      var curM = dNow.getMonth() + 1;
+      var curY = dNow.getFullYear() % 100;
+      
+      if(expY > curY || (expY === curY && expM >= curM)) {
+        expValid = true;
+      }
+    }
+    
+    if(!expValid){ 
+      document.getElementById('cExp').classList.add('bad'); 
+      ok=false; 
+    } else { 
+      document.getElementById('cExp').classList.remove('bad'); 
+    }
+    
+    // CVV Kontrolü: 3 haneli olmalı ve "000" olamaz
+    if(cvv.length !== 3 || cvv === '000'){ 
+      document.getElementById('cCvv').classList.add('bad'); 
+      ok=false; 
+    } else { 
+      document.getElementById('cCvv').classList.remove('bad'); 
+    }
+    
+    if(!ok){ 
+      toast('⚠️ Lütfen kart bilgilerinizi eksiksiz ve güncel tarihlerle giriniz.','#c62828');
+      return; 
+    }
+  }
+  
+  var eList  = Object.keys(equip).filter(function(k){ return equip[k]; });
+  var eCost  = eList.reduce(function(s,k){ return s + EPRICES[k]; }, 0);
+  var total  = PRICES[curField] + eCost;
+  var rid    = '#R' + Math.floor(1000 + Math.random()*9000);
+  var uname  = currentUser ? currentUser.first + (currentUser.last ? ' '+currentUser.last : '') : 'Guest';
+  var eStr   = eList.length ? eList.map(function(k){ return ENAMES[k]; }).join(', ') : 'None';
+  
+  // fieldId de eklendi
+  reservations.unshift({
+      id: rid, user: uname, userEmail: currentUser ? currentUser.email : '', 
+      date: curDate, time: curTime, 
+      field: NAMES[curField], fieldId: curField, 
+      equip: eStr, price: total+'₺', priceNum: total, status: 'ok'
+  });
+  
+  if(currentUser && !currentUser.isAdmin) currentUser.resCount = (currentUser.resCount||0)+1;
+  document.getElementById('tId').textContent    = rid;
+  document.getElementById('tTime').textContent  = curDate + ' ' + curTime;
+  document.getElementById('tField').textContent = NAMES[curField];
+  if(eList.length){ document.getElementById('tEquip').textContent = eStr; document.getElementById('tEquipRow').style.display=''; }
+  else document.getElementById('tEquipRow').style.display='none';
+  document.getElementById('tPrice').textContent = total + '₺';
+  buildResTable();
+  showScreen('successScreen');
+  toast('✅ Payment successful! Booking confirmed.');
+};
+
+document.getElementById('newBookBtn').onclick = function(){ buildSlots(); showScreen('mainScreen'); };
+
+// ─── MY RESERVATIONS ───
+function buildMyRes(){
+  var list = document.getElementById('myResList');
+  var mine = reservations.filter(function(r){ return r.userEmail === (currentUser ? currentUser.email : ''); });
+  if(!mine.length){
+    list.innerHTML = '<div class="empty"><div class="ei">📋</div><h3>No reservations yet</h3><p>Book a field to see your reservations here.</p></div>';
+    return;
+  }
+  list.innerHTML = mine.map(function(r){
+    return '<div class="rcard' + (r.status==='cancel'?' canc':'') + '">' +
+      '<div class="rinfo"><h4>' + r.field + '</h4><p>📅 ' + r.date + ' &nbsp;⏰ ' + r.time + '<br>🎽 Equipment: ' + r.equip + '<br>🏷️ ' + r.id + '</p></div>' +
+      '<div class="rright"><div class="rprice">' + r.price + '</div>' +
+      '<span class="pill ' + (r.status==='ok'?'pok':'pcanc') + '">' + (r.status==='ok'?'Confirmed':'Cancelled') + '</span>' +
+      (r.status==='ok' ? '<button class="cancbtn" onclick="cancelMyRes(\''+r.id+'\')">Cancel Booking</button>' : '') +
+      '</div></div>';
+  }).join('');
+}
+
+function cancelMyRes(id){
+  if(!confirm('Are you sure you want to cancel this booking?')) return;
+  var r = reservations.find(function(x){ return x.id===id; });
+  if(r){
+    r.status = 'cancel';
+    buildMyRes(); buildResTable();
+    toast('❌ Booking cancelled.','#c62828');
+  }
+}
+
+// ─── ACCOUNT ───
+function buildAccount(){
+  if(!currentUser) return;
+  var init = (currentUser.first[0] + (currentUser.last ? currentUser.last[0] : '')).toUpperCase();
+  document.getElementById('accAva').textContent  = init;
+  document.getElementById('accNm').textContent   = currentUser.first + (currentUser.last ? ' '+currentUser.last : '');
+  document.getElementById('accEm').textContent   = currentUser.email;
+  document.getElementById('aFirst').value        = currentUser.first;
+  document.getElementById('aLast').value         = currentUser.last || '';
+  document.getElementById('aPhone').value        = currentUser.phone || '';
+  var mine   = reservations.filter(function(r){ return r.userEmail===currentUser.email; });
+  var active = mine.filter(function(r){ return r.status==='ok'; });
+  document.getElementById('accTotal').textContent  = mine.length;
+  document.getElementById('accActive').textContent = active.length;
+  document.getElementById('accSpent').textContent  = active.reduce(function(s,r){ return s+r.priceNum; },0) + '₺';
+}
+
+document.getElementById('saveProfileBtn').onclick = function(){
+  if(!currentUser) return;
+  currentUser.first = document.getElementById('aFirst').value.trim() || currentUser.first;
+  currentUser.last  = document.getElementById('aLast').value.trim();
+  currentUser.phone = document.getElementById('aPhone').value.trim();
+  updateNav(); buildAccount();
+  toast('✅ Profile updated!');
+};
+
+document.getElementById('savePassBtn').onclick = function(){
+  hideErr('passErr');
+  var old  = document.getElementById('aOld').value;
+  var nw   = document.getElementById('aNew').value;
+  var nw2  = document.getElementById('aNew2').value;
+  if(old !== currentUser.pass){ showErr('passErr','Current password is incorrect.'); return; }
+  if(nw.length < 6){ showErr('passErr','New password must be at least 6 characters.'); return; }
+  if(nw !== nw2){ showErr('passErr','New passwords do not match.'); return; }
+  currentUser.pass = nw;
+  document.getElementById('aOld').value = '';
+  document.getElementById('aNew').value = '';
+  document.getElementById('aNew2').value = '';
+  toast('✅ Password changed!');
+};
+
+// ─── ADMIN ───
+function buildResTable(){
+  var b = document.getElementById('resBody'); if(!b) return;
+  b.innerHTML = reservations.length ? reservations.map(function(r){
+    return '<tr><td><b>'+r.id+'</b></td><td>'+r.user+'</td><td>'+r.date+' '+r.time+'</td><td>'+r.field+'</td><td style="font-size:11px;color:var(--muted)">'+r.equip+'</td><td style="color:var(--gold);font-weight:700">'+r.price+'</td><td><span class="pill '+(r.status==='ok'?'pok':'pcanc')+'">'+(r.status==='ok'?'Confirmed':'Cancelled')+'</span></td><td>'+(r.status!=='cancel'?'<button class="abtn2" onclick="admCancelRes(\''+r.id+'\')">Cancel</button>':'—')+'</td></tr>';
+  }).join('') : '<tr><td colspan="8" class="erow">No reservations yet.</td></tr>';
+  var ok = reservations.filter(function(r){ return r.status==='ok'; });
+  document.getElementById('admOk').textContent   = ok.length;
+  document.getElementById('admRev').textContent  = ok.reduce(function(s,r){ return s+r.priceNum; },0)+'₺';
+  document.getElementById('admCanc').textContent = reservations.filter(function(r){ return r.status==='cancel'; }).length;
+  document.getElementById('admUsers').textContent = users.length;
+}
+
+function admCancelRes(id){
+  var r = reservations.find(function(x){ return x.id===id; });
+  if(r){ r.status='cancel'; buildResTable(); buildSlotTable(); toast('❌ Reservation cancelled.','#c62828'); }
+}
+
+function buildSlotTable(){
+  var b = document.getElementById('slotBody'); if(!b) return;
+  
+  var adInput = document.getElementById('admDate');
+  var todayStr = getTodayStr();
+  adInput.min = todayStr; // Adminin de geçmişe gitmesini engelliyoruz
+  
+  if(!adInput.value) adInput.value = todayStr;
+  var aDate = adInput.value;
+
+  b.innerHTML = HOURS.map(function(h){
+    var closed = closedSlots.indexOf(h)>=0;
+    
+    // Her bir saha tipi için doluluk kontrolü fonksiyonu
+    function getStatus(fId) {
+      if(closed) return '<span class="pill pcanc">Closed</span>';
+      var isBooked = reservations.some(function(r) { return r.date === aDate && r.time.split(' - ')[0] === h && r.status === 'ok' && r.fieldId === fId; });
+      if(isBooked) return '<span class="pill pcanc" style="opacity:0.7">Booked</span>';
+      return '<span class="pill pok">Available</span>';
+    }
+
+    var btn  = '<button class="abtn2 '+(closed?'ok':'')+'" onclick="toggleSlot(\''+h+'\')">'+(closed?'Open All':'Close All')+'</button>';
+    
+    return '<tr>'+
+           '<td><b>'+slotLbl(h)+'</b></td>'+
+           '<td>'+getStatus('indoor')+'</td>'+
+           '<td>'+getStatus('normal')+'</td>'+
+           '<td>'+getStatus('mini')+'</td>'+
+           '<td>'+btn+'</td>'+
+           '</tr>';
+  }).join('');
+  
+  adInput.onchange = buildSlotTable;
+}
+
+function toggleSlot(h){
+  if(closedSlots.indexOf(h)>=0){ closedSlots=closedSlots.filter(function(s){return s!==h;}); toast('✅ Slot opened: '+slotLbl(h)); }
+  else { closedSlots.push(h); toast('🔒 Slot closed: '+slotLbl(h),'#c62828'); }
+  buildSlotTable();
+}
+
+function buildUserTable(){
+  var b = document.getElementById('userBody'); if(!b) return;
+  b.innerHTML = users.length ? users.map(function(u,i){
+    return '<tr><td><b>'+u.first+' '+u.last+'</b></td><td>'+u.email+'</td><td>'+u.phone+'</td><td>'+(u.resCount||0)+'</td><td><span class="pill '+(u.blocked?'pcanc':'pok')+'">'+(u.blocked?'Suspended':'Active')+'</span></td><td><button class="abtn2 '+(u.blocked?'ok':'')+'" onclick="toggleUser('+i+')">'+(u.blocked?'Unsuspend':'Suspend')+'</button></td></tr>';
+  }).join('') : '<tr><td colspan="6" class="erow">No registered users yet.</td></tr>';
+  document.getElementById('admUsers').textContent = users.length;
+}
+
+function toggleUser(i){
+  users[i].blocked = !users[i].blocked; buildUserTable();
+  toast(users[i].blocked ? '🚫 User suspended.' : '✅ Suspension lifted.', users[i].blocked ? '#c62828' : undefined);
+}
+
+function admTab(name){
+  ['res','slots','users'].forEach(function(n){
+    document.getElementById('tab-'+n).style.display = (n===name)?'':'none';
+    document.getElementById('tab-'+n+'-btn').classList.toggle('on', n===name);
+  });
+  if(name==='slots') buildSlotTable();
+  if(name==='users') buildUserTable();
+}
+
+// ─── HOLOGRAM PARTICLES ───
+(function(){
+  var cols = ['#00e5ff','#00ff64','#64ff00'];
+  [0,1,2].forEach(function(i){
+    var c = document.getElementById('p'+i); if(!c) return;
+    for(var j=0;j<14;j++){
+      var p = document.createElement('div'); p.className='pt';
+      p.style.cssText = 'left:'+(8+Math.random()*84)+'%;bottom:'+(Math.random()*20)+'%;background:'+cols[i]+';width:'+(1+Math.random()*2)+'px;height:'+(1+Math.random()*2)+'px;animation-duration:'+(1.5+Math.random()*2)+'s;animation-delay:'+(Math.random()*2.5)+'s;';
+      c.appendChild(p);
+    }
+  });
+})();
+</script>
+</body>
+</html>
